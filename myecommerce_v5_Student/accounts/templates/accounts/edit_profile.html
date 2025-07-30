@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-profile-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    .edit-header {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+    }
+    
+    .form-section {
+        margin-bottom: 30px;
+        padding: 25px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .form-section h3 {
+        margin-bottom: 20px;
+        color: #333;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 5px;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #555;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0,123,255,0.3);
+    }
+    
+    .current-picture {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
+        border: 3px solid #007bff;
+    }
+    
+    .btn-group {
+        text-align: center;
+        margin-top: 30px;
+        gap: 15px;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+    
+    .error-list {
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    
+    .error-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-profile-container">
+    <h2 class="edit-header">Edit Profile</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h3>Account Information</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ user_form.first_name.id_for_label }}">First Name</label>
+                    {{ user_form.first_name }}
+                    {% if user_form.first_name.errors %}
+                        <div class="error-list">{{ user_form.first_name.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ user_form.last_name.id_for_label }}">Last Name</label>
+                    {{ user_form.last_name }}
+                    {% if user_form.last_name.errors %}
+                        <div class="error-list">{{ user_form.last_name.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ user_form.email.id_for_label }}">Email</label>
+                {{ user_form.email }}
+                {% if user_form.email.errors %}
+                    <div class="error-list">{{ user_form.email.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Profile Information</h3>
+            
+            {% if user.is_superuser or user.profile.role == 'owner' %}
+            <div class="form-group">
+                <label for="{{ profile_form.role.id_for_label }}">Role</label>
+                {{ profile_form.role }}
+                {% if profile_form.role.errors %}
+                    <div class="error-list">{{ profile_form.role.errors }}</div>
+                {% endif %}
+                <small class="form-text">Only owners and superusers can change user roles.</small>
+            </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="{{ profile_form.phone_number.id_for_label }}">Phone Number</label>
+                {{ profile_form.phone_number }}
+                {% if profile_form.phone_number.errors %}
+                    <div class="error-list">{{ profile_form.phone_number.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ profile_form.date_of_birth.id_for_label }}">Date of Birth</label>
+                {{ profile_form.date_of_birth }}
+                {% if profile_form.date_of_birth.errors %}
+                    <div class="error-list">{{ profile_form.date_of_birth.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ profile_form.address.id_for_label }}">Address</label>
+                {{ profile_form.address }}
+                {% if profile_form.address.errors %}
+                    <div class="error-list">{{ profile_form.address.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ profile_form.profile_picture.id_for_label }}">Profile Picture</label>
+                {% if user.profile.profile_picture %}
+                    <div>
+                        <img src="{{ user.profile.profile_picture.url }}" alt="Current Profile" class="current-picture">
+                        <p><small>Current profile picture</small></p>
+                    </div>
+                {% endif %}
+                {{ profile_form.profile_picture }}
+                {% if profile_form.profile_picture.errors %}
+                    <div class="error-list">{{ profile_form.profile_picture.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

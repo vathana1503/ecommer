@@ -1,0 +1,537 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.order_id|slice:":8" }} - MyEcommerce{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.admin-header {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.order-sections {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.order-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.order-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.section-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+
+.section-header {
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.status-badge {
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-confirmed { background: #d1ecf1; color: #0c5460; }
+.status-processing { background: #d1ecf1; color: #0c5460; }
+.status-shipped { background: #ffeaa7; color: #6c5ce7; }
+.status-delivered { background: #d4edda; color: #155724; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+.status-refunded { background: #e2e3e5; color: #383d41; }
+
+.order-items-table {
+    width: 100%;
+}
+
+.order-items-table th {
+    background: #f8f9fa;
+    border: none;
+    padding: 12px;
+    font-weight: 600;
+}
+
+.order-items-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: top;
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.product-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.product-details h6 {
+    margin: 0 0 5px 0;
+    font-weight: 600;
+}
+
+.product-details p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.info-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #666;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: #333;
+}
+
+.price-summary {
+    border-top: 2px solid #f8f9fa;
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.price-row.total {
+    font-weight: bold;
+    font-size: 1.1rem;
+    border-top: 1px solid #dee2e6;
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+.status-timeline {
+    padding: 0;
+    list-style: none;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 20px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #dee2e6;
+}
+
+.timeline-item.active::before {
+    background: #28a745;
+}
+
+.timeline-item::after {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 18px;
+    width: 2px;
+    height: calc(100% + 10px);
+    background: #dee2e6;
+}
+
+.timeline-item:last-child::after {
+    display: none;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.form-select {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-select:focus {
+    border-color: #007bff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.status-update-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+@media (max-width: 768px) {
+    .order-sections {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Header -->
+    <div class="admin-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1><i class="fas fa-receipt me-3"></i>Order Details</h1>
+                <p class="text-muted mb-0">Order ID: <code>{{ order.order_id }}</code></p>
+            </div>
+            <div class="action-buttons">
+                <a href="{% url 'payment:admin_order_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                </a>
+                <button onclick="window.print()" class="btn btn-outline-primary">
+                    <i class="fas fa-print me-2"></i>Print
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="order-sections">
+        <!-- Main Content -->
+        <div class="order-main">
+            <!-- Order Items -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h4><i class="fas fa-shopping-bag me-2"></i>Order Items</h4>
+                </div>
+                
+                <table class="order-items-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th width="80">Qty</th>
+                            <th width="100">Price</th>
+                            <th width="100">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.order_items.all %}
+                        <tr>
+                            <td>
+                                <div class="product-info">
+                                    {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="product-image">
+                                    {% else %}
+                                    <div class="product-image bg-light d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div class="product-details">
+                                        <h6>{{ item.product.name }}</h6>
+                                        <p>{{ item.product.description|truncatewords:10 }}</p>
+                                        {% if item.product.sku %}
+                                        <p><strong>SKU:</strong> {{ item.product.sku }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <strong>{{ item.quantity }}</strong>
+                            </td>
+                            <td class="text-end">
+                                ${{ item.price }}
+                            </td>
+                            <td class="text-end">
+                                <strong>${{ item.total_price }}</strong>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="price-summary">
+                    <div class="price-row">
+                        <span>Subtotal:</span>
+                        <span>${{ order.total_amount }}</span>
+                    </div>
+                    {% if order.shipping_cost > 0 %}
+                    <div class="price-row">
+                        <span>Shipping:</span>
+                        <span>${{ order.shipping_cost }}</span>
+                    </div>
+                    {% endif %}
+                    {% if order.tax_amount > 0 %}
+                    <div class="price-row">
+                        <span>Tax:</span>
+                        <span>${{ order.tax_amount }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="price-row total">
+                        <span>Total:</span>
+                        <span>${{ order.grand_total }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h4><i class="fas fa-user me-2"></i>Customer Information</h4>
+                </div>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Customer</div>
+                        <div class="info-value">{{ order.first_name }} {{ order.last_name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ order.email }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Phone</div>
+                        <div class="info-value">{{ order.phone|default:"Not provided" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Order Date</div>
+                        <div class="info-value">{{ order.created_at|date:"M d, Y g:i A" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h4><i class="fas fa-truck me-2"></i>Shipping Information</h4>
+                </div>
+                
+                <div class="info-grid">
+                    <div>
+                        <div class="info-label">Shipping Address</div>
+                        <div class="info-value">
+                            {{ order.address_line_1 }}<br>
+                            {% if order.address_line_2 %}{{ order.address_line_2 }}<br>{% endif %}
+                            {{ order.city }}, {{ order.state }} {{ order.postal_code }}<br>
+                            {{ order.country }}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="info-label">Shipping Method</div>
+                        <div class="info-value">
+                            {% if order.shipping_method %}
+                                {{ order.shipping_method.name }}<br>
+                                <small class="text-muted">${{ order.shipping_method.price }}</small>
+                            {% else %}
+                                Standard Shipping
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="order-sidebar">
+            <!-- Order Status -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h5><i class="fas fa-info-circle me-2"></i>Order Status</h5>
+                </div>
+                
+                <div class="text-center mb-3">
+                    <span class="status-badge status-{{ order.status }}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Update Order Status:</strong>
+                </div>
+                
+                <form method="POST" action="{% url 'payment:admin_update_order_status' order.order_id %}" class="status-update-form">
+                    {% csrf_token %}
+                    <select name="status" class="form-select" id="status-select">
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if value == order.status %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm" 
+                            onclick="return confirmStatusUpdate()">
+                        <i class="fas fa-save me-1"></i>Update Status
+                    </button>
+                </form>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h5><i class="fas fa-credit-card me-2"></i>Payment</h5>
+                </div>
+                
+                {% if order.payment %}
+                <div class="info-item mb-3">
+                    <div class="info-label">Payment Method</div>
+                    <div class="info-value">{{ order.payment.get_payment_method_display }}</div>
+                </div>
+                <div class="info-item mb-3">
+                    <div class="info-label">Payment Status</div>
+                    <div class="info-value">
+                        <span class="badge bg-{{ order.payment.status|default:'secondary' }}">
+                            {{ order.payment.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                {% if order.payment.transaction_id %}
+                <div class="info-item mb-3">
+                    <div class="info-label">Transaction ID</div>
+                    <div class="info-value">
+                        <code>{{ order.payment.transaction_id }}</code>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="info-item">
+                    <div class="info-label">Amount Paid</div>
+                    <div class="info-value">
+                        <strong>${{ order.payment.amount_paid }}</strong>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center text-muted">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <p>No payment information available</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Order Timeline -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h5><i class="fas fa-history me-2"></i>Order Timeline</h5>
+                </div>
+                
+                <ul class="status-timeline">
+                    <li class="timeline-item active">
+                        <strong>Order Placed</strong><br>
+                        <small class="text-muted">{{ order.created_at|date:"M d, Y g:i A" }}</small>
+                    </li>
+                    {% if order.status != 'pending' %}
+                    <li class="timeline-item active">
+                        <strong>Order Confirmed</strong><br>
+                        <small class="text-muted">Status updated to {{ order.get_status_display }}</small>
+                    </li>
+                    {% endif %}
+                    {% if order.status == 'shipped' or order.status == 'delivered' %}
+                    <li class="timeline-item active">
+                        <strong>Order Shipped</strong><br>
+                        <small class="text-muted">Package dispatched</small>
+                    </li>
+                    {% endif %}
+                    {% if order.status == 'delivered' %}
+                    <li class="timeline-item active">
+                        <strong>Order Delivered</strong><br>
+                        <small class="text-muted">Package delivered successfully</small>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmStatusUpdate() {
+    const select = document.getElementById('status-select');
+    const currentStatus = '{{ order.status }}';
+    const newStatus = select.value;
+    const newStatusLabel = select.options[select.selectedIndex].text;
+    
+    if (newStatus === currentStatus) {
+        alert('Please select a different status to update.');
+        return false;
+    }
+    
+    return confirm(`Are you sure you want to update the order status to "${newStatusLabel}"?`);
+}
+
+// Add visual feedback when status changes
+document.addEventListener('DOMContentLoaded', function() {
+    const statusSelect = document.getElementById('status-select');
+    const originalStatus = '{{ order.status }}';
+    
+    statusSelect.addEventListener('change', function() {
+        const updateButton = this.form.querySelector('button[type="submit"]');
+        if (this.value !== originalStatus) {
+            updateButton.classList.remove('btn-primary');
+            updateButton.classList.add('btn-warning');
+            updateButton.innerHTML = '<i class="fas fa-save me-1"></i>Update Status';
+        } else {
+            updateButton.classList.remove('btn-warning');
+            updateButton.classList.add('btn-primary');
+            updateButton.innerHTML = '<i class="fas fa-save me-1"></i>Update Status';
+        }
+    });
+});
+</script>
+{% endblock %}

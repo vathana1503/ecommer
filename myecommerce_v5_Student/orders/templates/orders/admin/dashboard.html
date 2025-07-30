@@ -1,0 +1,482 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Orders - MyEcommerce{% endblock %}
+
+{% block extra_css %}
+<style>
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.dashboard-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.dashboard-subtitle {
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.stat-total {
+    color: #007bff;
+}
+
+.stat-total .stat-icon {
+    color: #007bff;
+}
+
+.stat-pending {
+    color: #ffc107;
+}
+
+.stat-pending .stat-icon {
+    color: #ffc107;
+}
+
+.stat-confirmed {
+    color: #28a745;
+}
+
+.stat-confirmed .stat-icon {
+    color: #28a745;
+}
+
+.stat-shipped {
+    color: #17a2b8;
+}
+
+.stat-shipped .stat-icon {
+    color: #17a2b8;
+}
+
+.stat-delivered {
+    color: #6f42c1;
+}
+
+.stat-delivered .stat-icon {
+    color: #6f42c1;
+}
+
+.recent-orders-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.section-header {
+    background: #f8f9fa;
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin: 0;
+    color: #333;
+}
+
+.orders-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+}
+
+.orders-table th {
+    background: #f8f9fa;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.orders-table td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.orders-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.order-id {
+    font-family: monospace;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.customer-info {
+    margin-bottom: 5px;
+}
+
+.customer-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.customer-email {
+    color: #666;
+    font-size: 12px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-pending {
+    background-color: #ffeaa7;
+    color: #e17055;
+}
+
+.status-confirmed {
+    background-color: #81ecec;
+    color: #00b894;
+}
+
+.status-processing {
+    background-color: #a29bfe;
+    color: #6c5ce7;
+}
+
+.status-shipped {
+    background-color: #fd79a8;
+    color: #e84393;
+}
+
+.status-delivered {
+    background-color: #55a3ff;
+    color: #0984e3;
+}
+
+.status-cancelled {
+    background-color: #fab1a0;
+    color: #e17055;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+.btn-outline-primary {
+    border: 1px solid #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-lg {
+    padding: 12px 24px;
+    font-size: 16px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    color: #ddd;
+}
+
+.quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 10px;
+    }
+    
+    .dashboard-title {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .orders-table {
+        font-size: 12px;
+    }
+    
+    .orders-table th,
+    .orders-table td {
+        padding: 8px 5px;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">
+            <i class="fas fa-tachometer-alt me-3"></i>Orders Dashboard
+        </h1>
+        <p class="dashboard-subtitle">Monitor and manage your e-commerce orders</p>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="stat-card stat-total">
+            <div class="stat-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-number">{{ total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        
+        <div class="stat-card stat-pending">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-number">{{ pending_orders }}</div>
+            <div class="stat-label">Pending Orders</div>
+        </div>
+        
+        <div class="stat-card stat-confirmed">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-number">{{ confirmed_orders }}</div>
+            <div class="stat-label">Confirmed</div>
+        </div>
+        
+        <div class="stat-card stat-shipped">
+            <div class="stat-icon">
+                <i class="fas fa-shipping-fast"></i>
+            </div>
+            <div class="stat-number">{{ shipped_orders }}</div>
+            <div class="stat-label">Shipped</div>
+        </div>
+        
+        <div class="stat-card stat-delivered">
+            <div class="stat-icon">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <div class="stat-number">{{ delivered_orders }}</div>
+            <div class="stat-label">Delivered</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{% url 'orders:admin_order_list' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-list me-2"></i>View All Orders
+        </a>
+        <a href="{% url 'orders:admin_order_list' %}?status=pending" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-clock me-2"></i>Pending Orders
+        </a>
+        <a href="{% url 'products:product_list' %}" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-box me-2"></i>Manage Products
+        </a>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="recent-orders-section">
+        <div class="section-header">
+            <h2 class="section-title">Recent Orders</h2>
+        </div>
+        
+        {% if recent_orders %}
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                    <td>
+                        <div class="order-id">#{{ order.order_id|truncatechars:12 }}</div>
+                    </td>
+                    <td>
+                        <div class="customer-info">
+                            <div class="customer-name">{{ order.first_name }} {{ order.last_name }}</div>
+                            <div class="customer-email">{{ order.email }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>{{ order.created_at|date:"M d, Y" }}</div>
+                        <small class="text-muted">{{ order.created_at|time:"g:i A" }}</small>
+                    </td>
+                    <td>
+                        {{ order.total_items }} item{{ order.total_items|pluralize }}
+                    </td>
+                    <td>
+                        <strong>${{ order.grand_total }}</strong>
+                    </td>
+                    <td>
+                        <span class="status-badge status-{{ order.status }}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'orders:admin_order_detail' order.order_id %}" 
+                               class="btn btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>No Orders Yet</h3>
+            <p>When customers place orders, they will appear here.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh dashboard every 2 minutes
+setTimeout(function() {
+    location.reload();
+}, 120000);
+
+// Live updates for pending orders count
+function updatePendingCount() {
+    fetch('/orders/pending-count/')
+        .then(response => response.json())
+        .then(data => {
+            // Update the pending orders count if it changed
+            const pendingElement = document.querySelector('.stat-pending .stat-number');
+            if (pendingElement && data.count !== undefined) {
+                const currentCount = parseInt(pendingElement.textContent);
+                if (currentCount !== data.count) {
+                    pendingElement.textContent = data.count;
+                    
+                    // Add a subtle animation to indicate change
+                    pendingElement.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        pendingElement.style.transform = 'scale(1)';
+                    }, 300);
+                }
+            }
+        })
+        .catch(error => {
+            console.log('Error updating pending count:', error);
+        });
+}
+
+// Update pending count every 30 seconds
+setInterval(updatePendingCount, 30000);
+</script>
+{% endblock %}

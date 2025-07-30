@@ -1,0 +1,349 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sales Report - E-commerce App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-form {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-control {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.3s ease;
+    }
+    
+    .btn:hover {
+        background: #0056b3;
+    }
+    
+    .report-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .summary-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .summary-card .value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 0.5rem;
+    }
+    
+    .summary-card .label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .report-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f8f9fa;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .export-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn-export {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-csv { background: #28a745; }
+    .btn-json { background: #17a2b8; }
+    .btn-pdf { background: #dc3545; }
+    
+    .btn-export:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+    
+    .status-breakdown {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .status-item {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+    
+    .status-item .count {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .status-item .status {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .report-summary {
+            grid-template-columns: 1fr;
+        }
+        
+        .export-buttons {
+            flex-direction: column;
+        }
+        
+        .table {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-header">
+    <h1><i class="fas fa-chart-line"></i> Sales Report</h1>
+    <p>Comprehensive sales analytics and performance metrics for your business.</p>
+</div>
+
+<!-- Filter Form -->
+<div class="filter-form">
+    <form method="get">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.report_type.id_for_label }}">Report Type:</label>
+                {{ form.report_type }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.start_date.id_for_label }}">Start Date:</label>
+                {{ form.start_date }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.end_date.id_for_label }}">End Date:</label>
+                {{ form.end_date }}
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn">
+                    <i class="fas fa-search"></i> Generate Report
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if report_data %}
+<!-- Report Summary -->
+<div class="report-summary">
+    <div class="summary-card">
+        <div class="value">{{ report_data.total_orders }}</div>
+        <div class="label">Total Orders</div>
+    </div>
+    <div class="summary-card">
+        <div class="value">${{ report_data.total_revenue|floatformat:2 }}</div>
+        <div class="label">Revenue (Delivered Orders Only)</div>
+    </div>
+    <div class="summary-card">
+        <div class="value">${{ report_data.average_order_value|floatformat:2 }}</div>
+        <div class="label">Avg Order Value (Delivered)</div>
+    </div>
+    <div class="summary-card">
+        <div class="value">{{ report_data.total_items_sold }}</div>
+        <div class="label">Items Sold</div>
+    </div>
+</div>
+
+<!-- Export Options -->
+<div class="report-section">
+    <h2 class="section-title">Export Report</h2>
+    <div class="export-buttons">
+        <button class="btn-export btn-csv" onclick="exportReport('csv')">
+            <i class="fas fa-file-csv"></i> Export CSV
+        </button>
+        <button class="btn-export btn-json" onclick="exportReport('json')">
+            <i class="fas fa-file-code"></i> Export JSON
+        </button>
+        <button class="btn-export btn-pdf" onclick="exportReport('pdf')">
+            <i class="fas fa-file-pdf"></i> Export PDF
+        </button>
+    </div>
+</div>
+
+<!-- Order Status Breakdown -->
+<div class="report-section">
+    <h2 class="section-title">Order Status Breakdown</h2>
+    <div class="status-breakdown">
+        {% for status in report_data.status_breakdown %}
+        <div class="status-item">
+            <div class="count">{{ status.count }}</div>
+            <div class="status">{{ status.status|title }}</div>
+            <div style="font-size: 0.8rem; color: #999;">
+                ${{ status.revenue|floatformat:2 }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Daily Sales Chart -->
+<div class="report-section">
+    <h2 class="section-title">Daily Sales Trend</h2>
+    {% if report_data.daily_sales %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Orders</th>
+                    <th>Revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in report_data.daily_sales %}
+                <tr>
+                    <td>{{ day.day }}</td>
+                    <td>{{ day.orders_count }}</td>
+                    <td>${{ day.revenue|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No daily sales data available for the selected period.</p>
+    {% endif %}
+</div>
+
+<script>
+function exportReport(format) {
+    const data = {
+        report_type: 'sales',
+        format: format,
+        start_date: '{{ report_data.start_date|date:"Y-m-d" }}',
+        end_date: '{{ report_data.end_date|date:"Y-m-d" }}'
+    };
+    
+    fetch('{% url "reports:export_report" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sales_report_${data.start_date}_${data.end_date}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    })
+    .catch(error => {
+        console.error('Export error:', error);
+        alert('Failed to export report. Please try again.');
+    });
+}
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Track Order - {{ order.order_id }} - MyEcommerce{% endblock %}
+
+{% block extra_css %}
+<style>
+.tracking-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.tracking-header {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border-radius: 8px;
+    padding: 30px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.tracking-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.order-id {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.tracking-timeline {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -23px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #e9ecef;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #e9ecef;
+}
+
+.timeline-item.completed::before {
+    background: #28a745;
+    box-shadow: 0 0 0 2px #28a745;
+}
+
+.timeline-item.current::before {
+    background: #007bff;
+    box-shadow: 0 0 0 2px #007bff;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 2px #007bff, 0 0 0 4px rgba(0,123,255,0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 2px #007bff, 0 0 0 8px rgba(0,123,255,0.2);
+    }
+    100% {
+        box-shadow: 0 0 0 2px #007bff, 0 0 0 4px rgba(0,123,255,0.4);
+    }
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    border-left: 4px solid #e9ecef;
+}
+
+.timeline-item.completed .timeline-content {
+    border-left-color: #28a745;
+}
+
+.timeline-item.current .timeline-content {
+    border-left-color: #007bff;
+    background: #e3f2fd;
+}
+
+.timeline-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.timeline-item.current .timeline-title {
+    color: #007bff;
+}
+
+.timeline-description {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.timeline-date {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.order-info {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.info-card {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.info-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #007bff;
+}
+
+.info-value {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.info-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.shipping-info {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 8px;
+}
+
+.shipping-address {
+    background: #f8f9fa;
+    border-radius: 4px;
+    padding: 15px;
+    border-left: 4px solid #007bff;
+}
+
+.estimated-delivery {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.delivery-date {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 5px;
+}
+
+.delivery-note {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.action-buttons {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+.btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.help-section {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+    .tracking-container {
+        padding: 10px;
+    }
+    
+    .tracking-header {
+        padding: 20px;
+    }
+    
+    .tracking-timeline {
+        padding: 20px;
+    }
+    
+    .timeline {
+        padding-left: 20px;
+    }
+    
+    .timeline::before {
+        left: 10px;
+    }
+    
+    .timeline-item::before {
+        left: -18px;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tracking-container">
+    <!-- Tracking Header -->
+    <div class="tracking-header">
+        <h1 class="tracking-title">Track Your Order</h1>
+        <p class="order-id">Order #{{ order.order_id }}</p>
+    </div>
+    
+    <!-- Order Info Cards -->
+    <div class="order-info">
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
+                <div class="info-value">{{ order.created_at|date:"M d, Y" }}</div>
+                <div class="info-label">Order Date</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-icon"><i class="fas fa-box"></i></div>
+                <div class="info-value">{{ order.total_items }}</div>
+                <div class="info-label">Items</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-icon"><i class="fas fa-dollar-sign"></i></div>
+                <div class="info-value">${{ order.grand_total }}</div>
+                <div class="info-label">Total Amount</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-icon"><i class="fas fa-credit-card"></i></div>
+                <div class="info-value">{{ order.payment.get_payment_method_display }}</div>
+                <div class="info-label">Payment Method</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estimated Delivery -->
+    {% if order.status in 'confirmed,processing,shipped' %}
+    <div class="estimated-delivery">
+        <div class="delivery-date">
+            {% if order.status == 'shipped' %}
+                Expected Delivery: {{ order.updated_at|date:"M d, Y"|add:"days:3" }}
+            {% else %}
+                Estimated Delivery: {{ order.created_at|date:"M d, Y"|add:"days:7" }}
+            {% endif %}
+        </div>
+        <div class="delivery-note">
+            {% if order.status == 'shipped' %}
+                Your order is on its way!
+            {% else %}
+                We'll notify you when your order ships
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Tracking Timeline -->
+    <div class="tracking-timeline">
+        <h3 class="section-title">Order Progress</h3>
+        
+        <div class="timeline">
+            <!-- Order Placed -->
+            <div class="timeline-item completed">
+                <div class="timeline-content">
+                    <div class="timeline-title">Order Placed</div>
+                    <div class="timeline-description">
+                        Your order has been received and is being prepared.
+                    </div>
+                    <div class="timeline-date">{{ order.created_at|date:"M d, Y g:i A" }}</div>
+                </div>
+            </div>
+            
+            <!-- Order Confirmed -->
+            <div class="timeline-item {% if order.status in 'confirmed,processing,shipped,delivered' %}completed{% elif order.status == 'confirmed' %}current{% endif %}">
+                <div class="timeline-content">
+                    <div class="timeline-title">Order Confirmed</div>
+                    <div class="timeline-description">
+                        {% if order.status in 'confirmed,processing,shipped,delivered' %}
+                            Your order has been confirmed and payment processed.
+                        {% else %}
+                            We're processing your payment and confirming your order.
+                        {% endif %}
+                    </div>
+                    {% if order.status in 'confirmed,processing,shipped,delivered' %}
+                        <div class="timeline-date">{{ order.updated_at|date:"M d, Y g:i A" }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Processing -->
+            <div class="timeline-item {% if order.status in 'processing,shipped,delivered' %}completed{% elif order.status == 'processing' %}current{% endif %}">
+                <div class="timeline-content">
+                    <div class="timeline-title">Processing</div>
+                    <div class="timeline-description">
+                        {% if order.status in 'processing,shipped,delivered' %}
+                            Your order has been processed and is being prepared for shipment.
+                        {% else %}
+                            Your order will be processed once confirmed.
+                        {% endif %}
+                    </div>
+                    {% if order.status in 'processing,shipped,delivered' %}
+                        <div class="timeline-date">{{ order.updated_at|date:"M d, Y g:i A" }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Shipped -->
+            <div class="timeline-item {% if order.status in 'shipped,delivered' %}completed{% elif order.status == 'shipped' %}current{% endif %}">
+                <div class="timeline-content">
+                    <div class="timeline-title">Shipped</div>
+                    <div class="timeline-description">
+                        {% if order.status in 'shipped,delivered' %}
+                            Your order has been shipped and is on its way to you.
+                        {% else %}
+                            Your order will be shipped once processing is complete.
+                        {% endif %}
+                    </div>
+                    {% if order.status in 'shipped,delivered' %}
+                        <div class="timeline-date">{{ order.updated_at|date:"M d, Y g:i A" }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Delivered -->
+            <div class="timeline-item {% if order.status == 'delivered' %}completed current{% endif %}">
+                <div class="timeline-content">
+                    <div class="timeline-title">Delivered</div>
+                    <div class="timeline-description">
+                        {% if order.status == 'delivered' %}
+                            Your order has been successfully delivered!
+                        {% else %}
+                            Your order will be delivered to your address.
+                        {% endif %}
+                    </div>
+                    {% if order.status == 'delivered' %}
+                        <div class="timeline-date">{{ order.updated_at|date:"M d, Y g:i A" }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Shipping Information -->
+    <div class="shipping-info">
+        <h3 class="section-title">Shipping Information</h3>
+        
+        <div class="shipping-address">
+            <strong>Delivery Address:</strong><br>
+            {{ order.first_name }} {{ order.last_name }}<br>
+            {{ order.shipping_address }}<br>
+            {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_postal_code }}<br>
+            {{ order.shipping_country }}
+        </div>
+        
+        {% if order.status == 'cancelled' %}
+        <div class="alert alert-danger text-center mt-3">
+            <i class="fas fa-times-circle me-2"></i>
+            <strong>Order Cancelled</strong><br>
+            This order was cancelled on {{ order.updated_at|date:"M d, Y" }}
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'payment:order_detail' order.order_id %}" class="btn btn-primary">
+            <i class="fas fa-eye me-2"></i>View Order Details
+        </a>
+        
+        <a href="{% url 'payment:order_list' %}" class="btn btn-outline-primary">
+            <i class="fas fa-list me-2"></i>All Orders
+        </a>
+        
+        {% if order.status in 'pending,confirmed' %}
+            <a href="{% url 'payment:cancel_order' order.order_id %}" 
+               class="btn btn-outline-danger"
+               onclick="return confirm('Are you sure you want to cancel this order?')">
+                <i class="fas fa-times me-2"></i>Cancel Order
+            </a>
+        {% endif %}
+    </div>
+    
+    <!-- Help Section -->
+    <div class="help-section">
+        <h4><i class="fas fa-question-circle me-2"></i>Need Help?</h4>
+        <p>If you have any questions about your order or need assistance, please contact our customer support team.</p>
+        <p>
+            <strong>Phone:</strong> +855-123-456-789<br>
+            <strong>Email:</strong> support@myecommerce.com<br>
+            <strong>Hours:</strong> Monday - Friday, 9 AM - 6 PM
+        </p>
+    </div>
+</div>
+{% endblock %}

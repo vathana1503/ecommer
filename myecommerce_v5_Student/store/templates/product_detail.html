@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - E-commerce App{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div class="product-card" style="max-width: none;">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 400px; object-fit: cover;">
+        {% else %}
+            <div style="width: 100%; height: 400px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                <h3>No Image Available</h3>
+            </div>
+        {% endif %}
+        <div class="product-info">
+            <h1 class="product-name">{{ product.name }}</h1>
+            <p class="product-price">${{ product.price }}</p>
+            {% if product.description %}
+                <div class="product-description">
+                    <h3>Description</h3>
+                    <p>{{ product.description }}</p>
+                </div>
+            {% endif %}
+            
+            <div style="margin-top: 2rem;">
+                <a href="{% url 'edit_product' product.id %}" class="btn btn-secondary">Edit Product</a>
+                <a href="{% url 'delete_product' product.id %}" class="btn" style="background-color: #dc3545; color: white;">Delete Product</a>
+                <a href="{% url 'store:dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

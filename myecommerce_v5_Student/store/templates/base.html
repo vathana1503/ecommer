@@ -1,0 +1,567 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}E-commerce App{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'store/css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+    <style>
+        .auth-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #333;
+        }
+        
+        .user-role {
+            color: #666;
+            font-style: italic;
+            font-size: 12px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-default-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .auth-links a {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .auth-links a:hover {
+            background: #0056b3;
+        }
+        
+        .logout-btn {
+            background: #dc3545 !important;
+        }
+        
+        .logout-btn:hover {
+            background: #c82333 !important;
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 20px;
+        }
+        
+        nav ul li {
+            position: relative;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        
+        nav ul li a:hover {
+            color: #007bff;
+            background: #f8f9fa;
+        }
+        
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+        }
+        
+        .dropdown-toggle {
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .dropdown-toggle::after {
+            content: '\f107';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-left: 5px;
+            transition: transform 0.3s;
+        }
+        
+        .dropdown:hover .dropdown-toggle::after {
+            transform: rotate(180deg);
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-menu li {
+            width: 100%;
+        }
+        
+        .dropdown-menu li a {
+            padding: 12px 16px;
+            display: block;
+            border-radius: 0;
+            border-bottom: 1px solid #f1f1f1;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .dropdown-menu li:last-child a {
+            border-bottom: none;
+        }
+        
+        .dropdown-menu li a:hover {
+            background: #f8f9fa;
+            color: #007bff;
+        }
+        
+        .dropdown-divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 8px 0;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.4em;
+            font-size: 75%;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.25rem;
+        }
+        
+        .badge-primary {
+            color: #fff;
+            background-color: #007bff;
+        }
+        
+        .badge-success {
+            color: #fff;
+            background-color: #28a745;
+        }
+        
+        .badge-warning {
+            color: #212529;
+            background-color: #ffc107;
+        }
+        
+        #cart-count {
+            margin-left: 5px;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                width: 100%;
+                gap: 0;
+                margin-bottom: 1rem;
+            }
+            
+            nav ul li {
+                width: 100%;
+            }
+            
+            nav ul li a {
+                padding: 12px 16px;
+                border-bottom: 1px solid #f1f1f1;
+            }
+            
+            .dropdown-menu {
+                position: static;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+                box-shadow: none;
+                border: none;
+                border-left: 3px solid #007bff;
+                background: #f8f9fa;
+                margin-left: 20px;
+            }
+            
+            .dropdown-menu li a {
+                padding: 8px 16px;
+                font-size: 13px;
+                color: #666;
+            }
+            
+            .auth-nav {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+            
+            .auth-links {
+                display: flex;
+                gap: 10px;
+            }
+        }
+        
+        /* Improved hover animations */
+        .dropdown-menu li a {
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .dropdown-menu li a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: #007bff;
+            transform: scaleY(0);
+            transition: transform 0.2s ease;
+        }
+        
+        .dropdown-menu li a:hover::before {
+            transform: scaleY(1);
+        }
+        
+        /* Loading animation for cart count */
+        .badge.loading {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'store:home' %}">
+                    <i class="fas fa-home"></i> Home
+                </a></li>
+                
+                <!-- Products Dropdown -->
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle">
+                        <i class="fas fa-box"></i> Products
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'products:product_list' %}">
+                            <i class="fas fa-list"></i> All Products
+                        </a></li>
+                        {% if user.is_authenticated and user.profile.can_manage_products %}
+                            <li><div class="dropdown-divider"></div></li>
+                            <li><a href="{% url 'products:add_product' %}">
+                                <i class="fas fa-plus"></i> Add Product
+                            </a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                
+                {% if user.is_authenticated %}
+                    {% if user.profile.role == 'customer' %}
+                        <!-- Shopping Dropdown -->
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle">
+                                <i class="fas fa-shopping-cart"></i> Shopping
+                                {% if cart_total_items > 0 %}
+                                    <span id="cart-count" class="badge badge-primary">{{ cart_total_items }}</span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{% url 'cart:cart_view' %}">
+                                    <i class="fas fa-shopping-cart"></i> Cart 
+                                    <span id="cart-count-dropdown" class="badge badge-primary" {% if cart_total_items == 0 %}style="display: none;"{% endif %}>{{ cart_total_items }}</span>
+                                </a></li>
+                                <li><a href="{% url 'cart:wishlist_view' %}">
+                                    <i class="fas fa-heart"></i> Wishlist
+                                </a></li>
+                                <li><div class="dropdown-divider"></div></li>
+                                <li><a href="{% url 'orders:order_list' %}">
+                                    <i class="fas fa-box"></i> My Orders
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                    
+                    {% if user.profile.role == 'staff' or user.profile.role == 'owner' %}
+                        <!-- Management Dropdown -->
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle">
+                                <i class="fas fa-cog"></i> Management
+                                {% if user.profile.role == 'staff' or user.profile.role == 'owner' %}
+                                    <span class="badge badge-warning" style="font-size: 10px; margin-left: 5px;" id="pending-orders-count">
+                                        <!-- Will be populated via JavaScript -->
+                                    </span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{% url 'orders:admin_dashboard' %}">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a></li>
+                                <li><a href="{% url 'orders:admin_order_list' %}">
+                                    <i class="fas fa-clipboard-list"></i> Manage Orders
+                                    <span class="badge badge-warning" style="font-size: 10px; margin-left: 5px;" id="pending-orders-count-dropdown">
+                                        <!-- Will be populated via JavaScript -->
+                                    </span>
+                                </a></li>
+                                {% if user.profile.role == 'owner' %}
+                                    <li><a href="{% url 'reports:dashboard' %}">
+                                        <i class="fas fa-chart-line"></i> Sales Reports
+                                    </a></li>
+                                {% endif %}
+                                {% if user.profile.can_access_dashboard %}
+                                    <li><a href="{% url 'store:dashboard' %}">
+                                        <i class="fas fa-chart-bar"></i> Store Dashboard
+                                    </a></li>
+                                {% endif %}
+                                {% if user.profile.can_access_admin %}
+                                    <li><div class="dropdown-divider"></div></li>
+                                    <li><a href="/admin/" target="_blank">
+                                        <i class="fas fa-tools"></i> Admin Panel
+                                    </a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+            
+            <div class="auth-nav">
+                {% if user.is_authenticated %}
+                    <div class="user-info">
+                        {% if user.profile.profile_picture %}
+                            <img src="{{ user.profile.profile_picture.url }}" alt="Profile" class="user-avatar">
+                        {% else %}
+                            <div class="user-default-avatar">
+                                {{ user.first_name|first|default:user.username|first }}
+                            </div>
+                        {% endif %}
+                        <span>Welcome, {{ user.first_name|default:user.username }}!</span>
+                        <small class="user-role">({{ user.profile.get_role_display }})</small>
+                    </div>
+                    
+                    <!-- Account Dropdown -->
+                    <div class="dropdown">
+                        <a href="#" class="dropdown-toggle" style="color: #007bff; font-weight: 500;">
+                            <i class="fas fa-user-circle"></i> Account
+                        </a>
+                        <ul class="dropdown-menu" style="right: 0; left: auto;">
+                            <li><a href="{% url 'accounts:profile' %}">
+                                <i class="fas fa-user"></i> My Profile
+                            </a></li>
+                            {% if user.profile.role == 'customer' %}
+                                <li><a href="{% url 'orders:order_list' %}">
+                                    <i class="fas fa-box"></i> Order History
+                                </a></li>
+                                <li><a href="{% url 'cart:wishlist_view' %}">
+                                    <i class="fas fa-heart"></i> My Wishlist
+                                </a></li>
+                            {% endif %}
+                            <li><div class="dropdown-divider"></div></li>
+                            <li><a href="{% url 'accounts:logout' %}" style="color: #dc3545;">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a></li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="auth-links">
+                        <a href="{% url 'accounts:login' %}">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                        <a href="{% url 'accounts:register' %}">
+                            <i class="fas fa-user-plus"></i> Register
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    <script src="{% static 'store/js/main.js' %}"></script>
+    
+    {% if user.is_authenticated %}
+        <script>
+            // Update counts when page loads
+            document.addEventListener('DOMContentLoaded', function() {
+                {% if user.profile.role == 'customer' %}
+                    // Update cart count
+                    updateCartCount();
+                {% endif %}
+                
+                {% if user.is_staff %}
+                    // Update pending orders count for admin
+                    updatePendingOrdersCount();
+                {% endif %}
+            });
+            
+            {% if user.profile.role == 'customer' %}
+                // Update cart count function
+                function updateCartCount() {
+                    fetch('{% url "cart:cart_count" %}')
+                        .then(response => response.json())
+                        .then(data => {
+                            const cartCountElement = document.getElementById('cart-count');
+                            const cartCountDropdownElement = document.getElementById('cart-count-dropdown');
+                            
+                            if (cartCountElement) {
+                                cartCountElement.textContent = data.count;
+                                cartCountElement.style.display = data.count > 0 ? 'inline-block' : 'none';
+                            }
+                            
+                            if (cartCountDropdownElement) {
+                                cartCountDropdownElement.textContent = data.count;
+                                cartCountDropdownElement.style.display = data.count > 0 ? 'inline-block' : 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error fetching cart count:', error));
+                }
+            {% endif %}
+            
+            {% if user.is_staff %}
+                // Update pending orders count for staff/admin
+                function updatePendingOrdersCount() {
+                    fetch('{% url "orders:pending_orders_count" %}')
+                        .then(response => response.json())
+                        .then(data => {
+                            const pendingCountElement = document.getElementById('pending-orders-count');
+                            const pendingCountDropdownElement = document.getElementById('pending-orders-count-dropdown');
+                            
+                            if (pendingCountElement) {
+                                pendingCountElement.textContent = data.count;
+                                pendingCountElement.style.display = data.count > 0 ? 'inline-block' : 'none';
+                            }
+                            
+                            if (pendingCountDropdownElement) {
+                                pendingCountDropdownElement.textContent = data.count;
+                                pendingCountDropdownElement.style.display = data.count > 0 ? 'inline-block' : 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error fetching pending orders count:', error));
+                }
+            {% endif %}
+            
+            // Prevent dropdown from closing when clicking dropdown toggle
+            document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                });
+            });
+        </script>
+    {% endif %}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

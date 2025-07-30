@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .profile-picture {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 15px;
+        border: 4px solid #007bff;
+    }
+    
+    .default-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: #007bff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        font-weight: bold;
+        margin: 0 auto 15px;
+    }
+    
+    .profile-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .info-group {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    
+    .info-group h3 {
+        margin-bottom: 15px;
+        color: #333;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 5px;
+    }
+    
+    .info-item {
+        margin-bottom: 10px;
+    }
+    
+    .info-item strong {
+        color: #555;
+        display: inline-block;
+        width: 120px;
+    }
+    
+    .btn-group {
+        text-align: center;
+        gap: 15px;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+    
+    @media (max-width: 768px) {
+        .profile-info {
+            grid-template-columns: 1fr;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        {% if profile.profile_picture %}
+            <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+        {% else %}
+            <div class="default-avatar">
+                {{ user.first_name|first|default:user.username|first }}
+            </div>
+        {% endif %}
+        <h2>{{ user.get_full_name|default:user.username }}</h2>
+        <p class="text-muted">Member since {{ user.date_joined|date:"F Y" }}</p>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="profile-info">
+        <div class="info-group">
+            <h3>Account Information</h3>
+            <div class="info-item">
+                <strong>Username:</strong> {{ user.username }}
+            </div>
+            <div class="info-item">
+                <strong>Email:</strong> {{ user.email|default:"Not provided" }}
+            </div>
+            <div class="info-item">
+                <strong>First Name:</strong> {{ user.first_name|default:"Not provided" }}
+            </div>
+            <div class="info-item">
+                <strong>Last Name:</strong> {{ user.last_name|default:"Not provided" }}
+            </div>
+        </div>
+        
+        <div class="info-group">
+            <h3>Profile Information</h3>
+            <div class="info-item">
+                <strong>Role:</strong> {{ profile.get_role_display }}
+            </div>
+            <div class="info-item">
+                <strong>Phone:</strong> {{ profile.phone_number|default:"Not provided" }}
+            </div>
+            <div class="info-item">
+                <strong>Date of Birth:</strong> {{ profile.date_of_birth|default:"Not provided" }}
+            </div>
+            <div class="info-item">
+                <strong>Address:</strong> {{ profile.address|default:"Not provided" }}
+            </div>
+            <div class="info-item">
+                <strong>Profile Created:</strong> {{ profile.created_at|date:"F d, Y" }}
+            </div>
+        </div>
+    </div>
+    
+    <div class="btn-group">
+        <a href="{% url 'accounts:edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+        <a href="{% url 'store:home' %}" class="btn btn-secondary">Back to Store</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - {{ order.order_id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .content {
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 30px;
+        }
+        
+        .order-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .order-items {
+            margin: 20px 0;
+        }
+        
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .item:last-child {
+            border-bottom: none;
+        }
+        
+        .totals {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .grand-total {
+            font-weight: bold;
+            font-size: 18px;
+            border-top: 2px solid #007bff;
+            padding-top: 10px;
+        }
+        
+        .shipping-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Order Confirmation</h1>
+        <p>Thank you for your order!</p>
+    </div>
+    
+    <div class="content">
+        <p>Hi {{ order.first_name }},</p>
+        
+        <p>We're excited to let you know that we've received your order and it's being processed. Here are the details:</p>
+        
+        <div class="order-info">
+            <h3>Order Information</h3>
+            <p><strong>Order Number:</strong> {{ order.order_id }}</p>
+            <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y" }}</p>
+            <p><strong>Payment Method:</strong> {{ order.payment.get_payment_method_display }}</p>
+            <p><strong>Order Status:</strong> {{ order.get_status_display }}</p>
+        </div>
+        
+        <h3>Order Items</h3>
+        <div class="order-items">
+            {% for item in order.order_items.all %}
+            <div class="item">
+                <div>
+                    <strong>{{ item.product.name }}</strong><br>
+                    <small>Quantity: {{ item.quantity }} × ${{ item.price }}</small>
+                </div>
+                <div>
+                    <strong>${{ item.total_price }}</strong>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="totals">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span>${{ order.total_amount }}</span>
+            </div>
+            
+            {% if order.shipping_cost > 0 %}
+            <div class="total-row">
+                <span>Shipping:</span>
+                <span>${{ order.shipping_cost }}</span>
+            </div>
+            {% endif %}
+            
+            {% if order.coupon_usage %}
+            <div class="total-row">
+                <span>Discount ({{ order.coupon_usage.coupon.code }}):</span>
+                <span style="color: green;">-${{ order.coupon_usage.discount_amount }}</span>
+            </div>
+            {% endif %}
+            
+            {% if order.tax_amount > 0 %}
+            <div class="total-row">
+                <span>Tax:</span>
+                <span>${{ order.tax_amount }}</span>
+            </div>
+            {% endif %}
+            
+            <div class="total-row grand-total">
+                <span>Grand Total:</span>
+                <span>${{ order.grand_total }}</span>
+            </div>
+        </div>
+        
+        <div class="shipping-info">
+            <h4>Shipping Address</h4>
+            <p>
+                {{ order.first_name }} {{ order.last_name }}<br>
+                {{ order.shipping_address }}<br>
+                {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_postal_code }}<br>
+                {{ order.shipping_country }}
+            </p>
+        </div>
+        
+        <p>
+            <strong>What's Next?</strong><br>
+            We'll send you another email when your order ships. You can also track your order status anytime by clicking the button below.
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="http://{{ site_name }}/payment/order/{{ order.order_id }}/" class="btn">Track Your Order</a>
+            <a href="http://{{ site_name }}/payment/orders/" class="btn">View All Orders</a>
+        </div>
+        
+        {% if order.order_notes %}
+        <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin: 20px 0;">
+            <h4>Order Notes</h4>
+            <p>{{ order.order_notes }}</p>
+        </div>
+        {% endif %}
+        
+        <p>If you have any questions about your order, please don't hesitate to contact us.</p>
+        
+        <p>
+            Best regards,<br>
+            The {{ site_name }} Team
+        </p>
+    </div>
+    
+    <div class="footer">
+        <p>
+            <strong>Need Help?</strong><br>
+            Email: support@myecommerce.com | Phone: +855-123-456-789<br>
+            Visit our website: <a href="http://{{ site_name }}">{{ site_name }}</a>
+        </p>
+        
+        <p>
+            <small>
+                This email was sent to {{ order.email }}. If you have any questions, please contact our customer service team.
+            </small>
+        </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Customer Sales Report - E-commerce App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-header {
+        background: linear-gradient(135deg, #6f42c1 0%, #563d7c 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-form {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-control {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        background: #6f42c1;
+        color: white;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.3s ease;
+    }
+    
+    .btn:hover {
+        background: #563d7c;
+    }
+    
+    .report-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f8f9fa;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .customer-tier {
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-align: center;
+    }
+    
+    .tier-vip { background: #ffd700; color: #333; }
+    .tier-premium { background: #e6f3ff; color: #0056b3; }
+    .tier-regular { background: #f0f0f0; color: #333; }
+    .tier-new { background: #e8f5e8; color: #2d5a2d; }
+    
+    .customer-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #6f42c1;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 1rem;
+    }
+    
+    .customer-info {
+        display: flex;
+        align-items: center;
+    }
+    
+    .customer-details {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .customer-name {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .customer-email {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .summary-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .stat-card .value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #6f42c1;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-card .label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .loyalty-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .loyalty-stars {
+        color: #ffc107;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .summary-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .table {
+            font-size: 0.9rem;
+        }
+        
+        .customer-info {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .customer-avatar {
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-header">
+    <h1><i class="fas fa-users"></i> Customer Sales Report</h1>
+    <p>Analyze customer behavior, identify top customers, and track customer lifetime value.</p>
+</div>
+
+<!-- Filter Form -->
+<div class="filter-form">
+    <form method="get">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.start_date.id_for_label }}">Start Date:</label>
+                {{ form.start_date }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.end_date.id_for_label }}">End Date:</label>
+                {{ form.end_date }}
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn">
+                    <i class="fas fa-search"></i> Generate Report
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if customer_data %}
+<!-- Summary Statistics -->
+<div class="summary-stats">
+    <div class="stat-card">
+        <div class="value">{{ customer_data|length }}</div>
+        <div class="label">Active Customers</div>
+    </div>
+    <div class="stat-card">
+        <div class="value">${{ customer_data.0.total_spent|default:0|floatformat:2 }}</div>
+        <div class="label">Top Customer Spending (Delivered)</div>
+    </div>
+    <div class="stat-card">
+        <div class="value">{{ customer_data.0.total_orders|default:0 }}</div>
+        <div class="label">Max Orders by Customer</div>
+    </div>
+</div>
+
+<!-- Customer Sales Data -->
+<div class="report-section">
+    <h2 class="section-title">Customer Performance Ranking</h2>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Customer</th>
+                <th>Total Orders</th>
+                <th>Total Spent (Delivered)</th>
+                <th>Avg Order Value (Delivered)</th>
+                <th>Customer Tier</th>
+                <th>Loyalty</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customer_data %}
+            <tr>
+                <td>
+                    <strong style="color: #6f42c1;">#{{ forloop.counter }}</strong>
+                </td>
+                <td>
+                    <div class="customer-info">
+                        <div class="customer-avatar">
+                            {{ customer.user__first_name|first|default:customer.user__username|first|upper }}
+                        </div>
+                        <div class="customer-details">
+                            <div class="customer-name">
+                                {{ customer.user__first_name }} {{ customer.user__last_name }}
+                            </div>
+                            <div class="customer-email">{{ customer.user__email }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <strong>{{ customer.total_orders }}</strong> orders
+                </td>
+                <td>
+                    <strong>${{ customer.total_spent|floatformat:2 }}</strong>
+                </td>
+                <td>
+                    ${{ customer.average_order_value|floatformat:2 }}
+                </td>
+                <td>
+                    {% if customer.total_spent >= 1000 %}
+                        <span class="customer-tier tier-vip">VIP</span>
+                    {% elif customer.total_spent >= 500 %}
+                        <span class="customer-tier tier-premium">Premium</span>
+                    {% elif customer.total_orders >= 3 %}
+                        <span class="customer-tier tier-regular">Regular</span>
+                    {% else %}
+                        <span class="customer-tier tier-new">New</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="loyalty-indicator">
+                        {% if customer.total_orders >= 10 %}
+                            <span class="loyalty-stars">★★★★★</span>
+                        {% elif customer.total_orders >= 7 %}
+                            <span class="loyalty-stars">★★★★☆</span>
+                        {% elif customer.total_orders >= 5 %}
+                            <span class="loyalty-stars">★★★☆☆</span>
+                        {% elif customer.total_orders >= 3 %}
+                            <span class="loyalty-stars">★★☆☆☆</span>
+                        {% else %}
+                            <span class="loyalty-stars">★☆☆☆☆</span>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Customer Insights -->
+<div class="report-section">
+    <h2 class="section-title">Customer Insights</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+            <h4 style="color: #ffd700; margin-bottom: 1rem;">
+                <i class="fas fa-crown"></i> VIP Customers
+            </h4>
+            <ul style="list-style: none; padding: 0;">
+                {% for customer in customer_data %}
+                    {% if customer.total_spent >= 1000 %}
+                    <li style="margin-bottom: 0.5rem;">
+                        <strong>{{ customer.user__first_name }} {{ customer.user__last_name }}</strong>
+                        <br>
+                        <small style="color: #666;">${{ customer.total_spent|floatformat:2 }} spent</small>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+            <h4 style="color: #28a745; margin-bottom: 1rem;">
+                <i class="fas fa-heart"></i> Loyal Customers
+            </h4>
+            <ul style="list-style: none; padding: 0;">
+                {% for customer in customer_data %}
+                    {% if customer.total_orders >= 7 %}
+                    <li style="margin-bottom: 0.5rem;">
+                        <strong>{{ customer.user__first_name }} {{ customer.user__last_name }}</strong>
+                        <br>
+                        <small style="color: #666;">{{ customer.total_orders }} orders</small>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+            <h4 style="color: #17a2b8; margin-bottom: 1rem;">
+                <i class="fas fa-user-plus"></i> New Customers
+            </h4>
+            <ul style="list-style: none; padding: 0;">
+                {% for customer in customer_data %}
+                    {% if customer.total_orders == 1 %}
+                    <li style="margin-bottom: 0.5rem;">
+                        <strong>{{ customer.user__first_name }} {{ customer.user__last_name }}</strong>
+                        <br>
+                        <small style="color: #666;">First purchase: ${{ customer.total_spent|floatformat:2 }}</small>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Customer Tier Distribution -->
+<div class="report-section">
+    <h2 class="section-title">Customer Tier Distribution</h2>
+    
+    {% with vip_count=0 premium_count=0 regular_count=0 new_count=0 %}
+        {% for customer in customer_data %}
+            {% if customer.total_spent >= 1000 %}
+                {% with vip_count=vip_count|add:1 %}{% endwith %}
+            {% elif customer.total_spent >= 500 %}
+                {% with premium_count=premium_count|add:1 %}{% endwith %}
+            {% elif customer.total_orders >= 3 %}
+                {% with regular_count=regular_count|add:1 %}{% endwith %}
+            {% else %}
+                {% with new_count=new_count|add:1 %}{% endwith %}
+            {% endif %}
+        {% endfor %}
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+            <div style="text-align: center; padding: 1rem; background: #fff3cd; border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #856404;">
+                    {{ customer_data|length|default:0 }}
+                </div>
+                <div style="color: #856404;">Total Customers</div>
+            </div>
+        </div>
+    {% endwith %}
+</div>
+
+{% else %}
+<div class="report-section">
+    <p style="text-align: center; color: #666; font-size: 1.1rem;">
+        <i class="fas fa-info-circle"></i> 
+        Please select a date range and click "Generate Report" to view customer sales data.
+    </p>
+</div>
+{% endif %}
+{% endblock %}

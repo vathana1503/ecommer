@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - E-commerce App{% endblock %}
+
+{% block content %}
+<h1>Store Dashboard</h1>
+
+<div style="margin-bottom: 2rem; text-align: center;">
+    <a href="{% url 'products:add_product' %}" class="btn btn-primary">Add New Product</a>
+    <a href="{% url 'products:product_list' %}" class="btn btn-secondary">Manage Products</a>
+</div>
+
+<div class="dashboard-stats">
+    <h2>Store Statistics</h2>
+    <p>Total Products: {{ products.count }}</p>
+</div>
+
+{% if products %}
+    <h3>Recent Products</h3>
+    <div class="product-grid">
+        {% for product in products|slice:":6" %}
+        <div class="product-card">
+            <a href="{% url 'products:product_detail' product.id %}" style="text-decoration: none; color: inherit;">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                {% else %}
+                    <div class="product-image" style="background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                        No Image
+                    </div>
+                {% endif %}
+            </a>
+            <div class="product-info">
+                <h3 class="product-name">{{ product.category.name }}</h3>
+                <h3 class="product-name">{{ product.name }}</h3>
+                <p class="product-price">${{ product.price }}</p>
+                <p class="product-qty">Stock: {{ product.qty }}</p>
+                <div style="margin-top: 1rem;">
+                    <a href="{% url 'products:product_detail' product.id %}" class="btn btn-primary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">View</a>
+                    <a href="{% url 'products:edit_product' product.id %}" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">Edit</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div style="text-align: center; padding: 3rem; color: #6c757d;">
+        <h3>No products in your store</h3>
+        <p>Start building your inventory by adding products!</p>
+        <a href="{% url 'products:add_product' %}" class="btn btn-primary" style="margin-top: 1rem;">Add Your First Product</a>
+    </div>
+{% endif %}
+{% endblock %}

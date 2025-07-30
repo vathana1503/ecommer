@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Product - E-commerce App{% endblock %}
+
+{% block content %}
+<h1>Add New Product</h1>
+
+<div class="form-container">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Add Product</button>
+        <a href="{% url 'store:home' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
